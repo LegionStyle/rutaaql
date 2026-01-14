@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema GPS Transporte</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra lateral -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="company-logo">
+                <i class="fas fa-bus-alt"></i>
+                <div class="company-info">
+                    <h3 id="companyName">Transporte Rápido S.A.</h3>
+                    <span class="company-status"><i class="fas fa-circle online"></i> En línea</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <ul>
+                <li class="active">
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="vehiculos.html">
+                        <i class="fas fa-bus"></i>
+                        <span>Vehículos</span>
+                        <span class="badge" id="vehiculosCount">12</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="rutas.html">
+                        <i class="fas fa-route"></i>
+                        <span>Rutas</span>
+                        <span class="badge" id="rutasCount">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="mapa.html">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Mapa en Tiempo Real</span>
+                        <span class="badge live">LIVE</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-users"></i>
+                        <span>Choferes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-email" id="userEmail">admin@transporte.com</span>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Header superior -->
+        <header class="top-header">
+            <div class="header-left">
+                <h1>Panel de Control</h1>
+                <p id="currentDate">Cargando fecha...</p>
+            </div>
+            <div class="header-right">
+                <div class="notifications">
+                    <button class="icon-btn" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                </div>
+                <div class="refresh-control">
+                    <button class="btn-refresh" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
+                    <span class="last-update">Última actualización: <span id="lastUpdateTime">--:--</span></span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Estadísticas principales -->
+        <section class="stats-section">
+            <h2>Resumen General</h2>
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Vehículos Activos</h3>
+                        <p class="stat-number" id="activeVehicles">8</p>
+                        <p class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>2 más que ayer</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Rutas Activas</h3>
+                        <p class="stat-number" id="activeRoutes">5</p>
+                        <p class="stat-change">
+                            <i class="fas fa-check"></i>
+                            <span>Todas operativas</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Choferes Activos</h3>
+                        <p class="stat-number" id="activeDrivers">10</p>
+                        <p class="stat-change">
+                            <i class="fas fa-user-clock"></i>
+                            <span>3 en descanso</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="stat-card danger">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Incidentes</h3>
+                        <p class="stat-number" id="incidents">2</p>
+                        <p class="stat-change">
+                            <i class="fas fa-clock"></i>
+                            <span>Por atender</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gráficos y mapa -->
+        <section class="dashboard-content">
+            <div class="content-row">
+                <!-- Mapa mini -->
+                <div class="content-card large">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> Mapa de Flota</h3>
+                        <a href="mapa.html" class="view-all">Ver mapa completo <i class="fas fa-external-link-alt"></i></a>
+                    </div>
+                    <div class="mini-map" id="miniMap">
+                        <div class="map-placeholder">
+                            <i class="fas fa-map fa-3x"></i>
+                            <p>Vista previa del mapa en tiempo real</p>
+                            <button class="btn-map-view" id="openMapBtn">Abrir Mapa</button>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <span class="legend-color moving"></span>
+                                <span>En movimiento (5)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color stopped"></span>
+                                <span>Detenido (3)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color offline"></span>
+                                <span>Sin señal (1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actividad reciente -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Actividad Reciente</h3>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <!-- Las actividades se cargarán por JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lista de vehículos -->
+            <div class="content-row">
+                <div class="content-card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Vehículos en Operación</h3>
+                        <div class="vehicle-filters">
+                            <button class="filter-btn active" data-filter="all">Todos</button>
+                            <button class="filter-btn" data-filter="moving">En movimiento</button>
+                            <button class="filter-btn" data-filter="stopped">Detenidos</button>
+                            <button class="filter-btn" data-filter="offline">Sin señal</button>
+                        </div>
+                    </div>
+                    <div class="vehicle-table-container">
+                        <table class="vehicle-table" id="vehicleTable">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Chofer</th>
+                                    <th>Ruta</th>
+                                    <th>Estado</th>
+                                    <th>Última ubicación</th>
+                                    <th>Velocidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vehicleTableBody">
+                                <!-- Los vehículos se cargarán por JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer del dashboard -->
+        <footer class="dashboard-footer">
+            <p>Sistema GPS Transporte v1.0 | <span id="serverStatus"><i class="fas fa-circle online"></i> Servidor conectado</span> | Último ping: <span id="lastPing">--:--:--</span></p>
+        </footer>
+    </div>
+    
+    <!-- Modal de notificaciones -->
+    <div class="modal" id="notificationsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell"></i> Notificaciones</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="notificationsList">
+                <!-- Notificaciones se cargarán aquí -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-clear" id="clearNotificationsBtn">Limpiar todo</button>
+                <button class="btn-close" id="closeModalBtn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

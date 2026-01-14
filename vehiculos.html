@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Vehículos - Sistema GPS Transporte</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra lateral -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="company-logo">
+                <i class="fas fa-bus-alt"></i>
+                <div class="company-info">
+                    <h3 id="companyName">Transporte Rápido S.A.</h3>
+                    <span class="company-status"><i class="fas fa-circle online"></i> En línea</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="vehiculos.html">
+                        <i class="fas fa-bus"></i>
+                        <span>Vehículos</span>
+                        <span class="badge" id="vehiculosCount">12</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="rutas.html">
+                        <i class="fas fa-route"></i>
+                        <span>Rutas</span>
+                        <span class="badge">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="mapa.html">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Mapa en Tiempo Real</span>
+                        <span class="badge live">LIVE</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-users"></i>
+                        <span>Choferes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-email" id="userEmail">admin@transporte.com</span>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Header superior -->
+        <header class="top-header">
+            <div class="header-left">
+                <h1><i class="fas fa-bus"></i> Gestión de Vehículos</h1>
+                <p>Administra tu flota vehicular</p>
+            </div>
+            <div class="header-right">
+                <div class="actions">
+                    <button class="btn-primary" id="addVehicleBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nuevo Vehículo
+                    </button>
+                    <button class="btn-secondary" id="exportBtn">
+                        <i class="fas fa-file-export"></i>
+                        Exportar
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Filtros y búsqueda -->
+        <section class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar vehículo por placa, chofer o código...">
+            </div>
+            
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="statusFilter"><i class="fas fa-filter"></i> Estado:</label>
+                    <select id="statusFilter">
+                        <option value="all">Todos los estados</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                        <option value="maintenance">En mantenimiento</option>
+                        <option value="offline">Sin señal</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="routeFilter"><i class="fas fa-route"></i> Ruta:</label>
+                    <select id="routeFilter">
+                        <option value="all">Todas las rutas</option>
+                        <option value="centro">Ruta Centro</option>
+                        <option value="norte">Ruta Norte</option>
+                        <option value="sur">Ruta Sur</option>
+                        <option value="este">Ruta Este</option>
+                        <option value="oeste">Ruta Oeste</option>
+                    </select>
+                </div>
+                
+                <button class="btn-filter" id="applyFiltersBtn">
+                    <i class="fas fa-check"></i>
+                    Aplicar Filtros
+                </button>
+                
+                <button class="btn-clear" id="clearFiltersBtn">
+                    <i class="fas fa-times"></i>
+                    Limpiar
+                </button>
+            </div>
+        </section>
+        
+        <!-- Estadísticas rápidas -->
+        <section class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="activeCount">8</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-wrench"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="maintenanceCount">2</span>
+                    <span class="stat-label">En Mantenimiento</span>
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="inactiveCount">2</span>
+                    <span class="stat-label">Inactivos</span>
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="offlineCount">1</span>
+                    <span class="stat-label">Sin Señal</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Tabla de vehículos -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> Lista de Vehículos</h2>
+                <div class="section-actions">
+                    <button class="btn-icon" id="refreshTableBtn" title="Actualizar">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" id="printBtn" title="Imprimir">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="data-table" id="vehiclesTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>Placa</th>
+                            <th>Código</th>
+                            <th>Chofer</th>
+                            <th>Ruta</th>
+                            <th>Estado</th>
+                            <th>Última Actividad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehiclesTableBody">
+                        <!-- Los vehículos se cargarán por JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-footer">
+                <div class="table-info">
+                    Mostrando <span id="showingCount">0</span> de <span id="totalCount">0</span> vehículos
+                </div>
+                <div class="pagination">
+                    <button class="pagination-btn" id="prevPage" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="page-info">Página <span id="currentPage">1</span> de <span id="totalPages">1</span></span>
+                    <button class="pagination-btn" id="nextPage" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Acciones masivas -->
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+            <div class="bulk-info">
+                <i class="fas fa-check-square"></i>
+                <span id="selectedCount">0</span> vehículos seleccionados
+            </div>
+            <div class="bulk-buttons">
+                <button class="btn-bulk" id="bulkActivate">
+                    <i class="fas fa-play"></i> Activar
+                </button>
+                <button class="btn-bulk" id="bulkDeactivate">
+                    <i class="fas fa-pause"></i> Desactivar
+                </button>
+                <button class="btn-bulk" id="bulkMaintenance">
+                    <i class="fas fa-wrench"></i> Mantenimiento
+                </button>
+                <button class="btn-bulk danger" id="bulkDelete">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <button class="btn-bulk" id="clearSelection">
+                    <i class="fas fa-times"></i> Limpiar selección
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar vehículo -->
+    <div class="modal" id="vehicleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bus"></i> <span id="modalTitle">Nuevo Vehículo</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="vehicleForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalPlaca"><i class="fas fa-id-card"></i> Placa *</label>
+                            <input type="text" id="modalPlaca" required maxlength="10" placeholder="Ej: ABC-123">
+                            <small class="form-hint">Formato: ABC-123 o ABC123</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modalCodigo"><i class="fas fa-barcode"></i> Código Interno *</label>
+                            <input type="text" id="modalCodigo" required placeholder="Ej: V001">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalChofer"><i class="fas fa-user-tie"></i> Chofer *</label>
+                            <select id="modalChofer" required>
+                                <option value="">Seleccionar chofer</option>
+                                <option value="1">Juan Pérez</option>
+                                <option value="2">María López</option>
+                                <option value="3">Carlos Ruiz</option>
+                                <option value="4">Ana García</option>
+                                <option value="5">Roberto Sánchez</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modalRuta"><i class="fas fa-route"></i> Ruta Asignada</label>
+                            <select id="modalRuta">
+                                <option value="">Sin ruta asignada</option>
+                                <option value="centro">Ruta Centro</option>
+                                <option value="norte">Ruta Norte</option>
+                                <option value="sur">Ruta Sur</option>
+                                <option value="este">Ruta Este</option>
+                                <option value="oeste">Ruta Oeste</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalMarca"><i class="fas fa-industry"></i> Marca</label>
+                            <input type="text" id="modalMarca" placeholder="Ej: Mercedes Benz">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modalModelo"><i class="fas fa-car"></i> Modelo</label>
+                            <input type="text" id="modalModelo" placeholder="Ej: O500U">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalAnio"><i class="fas fa-calendar-alt"></i> Año</label>
+                            <input type="number" id="modalAnio" min="2000" max="2024" placeholder="2022">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="modalCapacidad"><i class="fas fa-users"></i> Capacidad</label>
+                            <input type="number" id="modalCapacidad" min="1" max="100" placeholder="50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalEstado"><i class="fas fa-power-off"></i> Estado</label>
+                        <select id="modalEstado" required>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="maintenance">En mantenimiento</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalObservaciones"><i class="fas fa-sticky-note"></i> Observaciones</label>
+                        <textarea id="modalObservaciones" rows="3" placeholder="Notas adicionales sobre el vehículo..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="modalVehicleId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModalBtn">Cancelar</button>
+                <button class="btn-primary" id="saveVehicleBtn">
+                    <i class="fas fa-save"></i>
+                    <span id="saveButtonText">Guardar Vehículo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmación</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">¿Está seguro de realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelConfirmBtn">Cancelar</button>
+                <button class="btn-primary danger" id="confirmActionBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de detalles -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Detalles del Vehículo</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="vehicle-details" id="vehicleDetailsContent">
+                    <!-- Los detalles se cargarán por JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="closeDetailsBtn">Cerrar</button>
+                <button class="btn-primary" id="editDetailsBtn">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/vehiculos.js"></script>
+</body>
+</html>

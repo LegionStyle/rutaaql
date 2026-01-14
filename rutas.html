@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Rutas - Sistema GPS Transporte</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+</head>
+<body>
+    <!-- Barra lateral -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="company-logo">
+                <i class="fas fa-bus-alt"></i>
+                <div class="company-info">
+                    <h3 id="companyName">Transporte Rápido S.A.</h3>
+                    <span class="company-status"><i class="fas fa-circle online"></i> En línea</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="vehiculos.html">
+                        <i class="fas fa-bus"></i>
+                        <span>Vehículos</span>
+                        <span class="badge">12</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="rutas.html">
+                        <i class="fas fa-route"></i>
+                        <span>Rutas</span>
+                        <span class="badge" id="rutasCount">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="mapa.html">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Mapa en Tiempo Real</span>
+                        <span class="badge live">LIVE</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-users"></i>
+                        <span>Choferes</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-email" id="userEmail">admin@transporte.com</span>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Header superior -->
+        <header class="top-header">
+            <div class="header-left">
+                <h1><i class="fas fa-route"></i> Gestión de Rutas</h1>
+                <p>Diseña y administra las rutas de transporte</p>
+            </div>
+            <div class="header-right">
+                <div class="actions">
+                    <button class="btn-primary" id="addRouteBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Nueva Ruta
+                    </button>
+                    <button class="btn-secondary" id="viewMapBtn">
+                        <i class="fas fa-map"></i>
+                        Vista de Mapa
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Sección de rutas activas -->
+        <section class="active-routes-section">
+            <div class="section-header">
+                <h2><i class="fas fa-play-circle"></i> Rutas Activas</h2>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="routes-grid" id="routesGrid">
+                <!-- Las rutas se cargarán por JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Contenido principal con dos columnas -->
+        <div class="two-column-layout">
+            <!-- Columna izquierda: Mapa de rutas -->
+            <div class="column-left">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map-marked-alt"></i> Mapa de Rutas</h3>
+                        <button class="btn-icon" id="refreshMapBtn" title="Actualizar mapa">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="map-container">
+                        <div id="routeMap"></div>
+                        <div class="map-controls">
+                            <button class="map-control-btn" id="zoomInBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="map-control-btn" id="zoomOutBtn">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="map-control-btn" id="resetViewBtn">
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #3498db;"></span>
+                                <span>Ruta seleccionada</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #27ae60;"></span>
+                                <span>Rutas activas</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #f39c12;"></span>
+                                <span>Paraderos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas de rutas -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie"></i> Estadísticas</h3>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" id="totalRoutes">5</span>
+                                <span class="stat-label">Rutas Totales</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-bus"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" id="assignedVehicles">8</span>
+                                <span class="stat-label">Vehículos Asignados</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" id="totalStops">42</span>
+                                <span class="stat-label">Paraderos Totales</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-number" id="avgDuration">45</span>
+                                <span class="stat-label">Duración Promedio (min)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna derecha: Lista de rutas y paraderos -->
+            <div class="column-right">
+                <!-- Lista detallada de rutas -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list-ol"></i> Todas las Rutas</h3>
+                        <div class="search-box-small">
+                            <input type="text" id="searchRoutes" placeholder="Buscar ruta...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    <div class="routes-list-container">
+                        <table class="routes-table" id="routesTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Vehículos</th>
+                                    <th>Paraderos</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="routesTableBody">
+                                <!-- Las rutas se cargarán por JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Paraderos de la ruta seleccionada -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map-marker-alt"></i> Paraderos</h3>
+                        <span class="route-selected" id="selectedRouteName">Seleccione una ruta</span>
+                    </div>
+                    <div class="stops-container">
+                        <div class="stops-list" id="stopsList">
+                            <div class="empty-stops">
+                                <i class="fas fa-map-pin fa-2x"></i>
+                                <p>Seleccione una ruta para ver sus paraderos</p>
+                            </div>
+                        </div>
+                        <div class="stops-actions">
+                            <button class="btn-secondary" id="addStopBtn" disabled>
+                                <i class="fas fa-plus"></i> Agregar Paradero
+                            </button>
+                            <button class="btn-secondary" id="reorderStopsBtn" disabled>
+                                <i class="fas fa-sort"></i> Reordenar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para crear/editar ruta -->
+    <div class="modal" id="routeModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-route"></i> <span id="modalTitle">Nueva Ruta</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="routeForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalNombre"><i class="fas fa-signature"></i> Nombre de la Ruta *</label>
+                            <input type="text" id="modalNombre" required placeholder="Ej: Ruta Centro - Norte">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalCodigo"><i class="fas fa-hashtag"></i> Código *</label>
+                            <input type="text" id="modalCodigo" required placeholder="Ej: RT-001">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalColor"><i class="fas fa-palette"></i> Color de la Ruta</label>
+                            <div class="color-picker">
+                                <input type="color" id="modalColor" value="#3498db">
+                                <span id="colorValue">#3498db</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalEstado"><i class="fas fa-power-off"></i> Estado</label>
+                            <select id="modalEstado" required>
+                                <option value="active">Activa</option>
+                                <option value="inactive">Inactiva</option>
+                                <option value="maintenance">En mantenimiento</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalDuracion"><i class="fas fa-clock"></i> Duración Estimada (min)</label>
+                            <input type="number" id="modalDuracion" min="1" max="300" value="45">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalDistancia"><i class="fas fa-ruler-combined"></i> Distancia (km)</label>
+                            <input type="number" id="modalDistancia" min="0.1" max="500" step="0.1" value="12.5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalDescripcion"><i class="fas fa-align-left"></i> Descripción</label>
+                        <textarea id="modalDescripcion" rows="3" placeholder="Descripción de la ruta, horarios, observaciones..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Paraderos</label>
+                        <div class="stops-editor">
+                            <div class="stops-input-container">
+                                <div class="stops-input">
+                                    <input type="text" id="stopNameInput" placeholder="Nombre del paradero">
+                                    <button type="button" class="btn-add-stop" id="addStopInputBtn">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </div>
+                                <small class="form-hint">Presione Enter o haga clic en Agregar para añadir paraderos</small>
+                            </div>
+                            <div class="stops-list-editor" id="stopsListEditor">
+                                <!-- Los paraderos se agregarán aquí -->
+                                <div class="empty-stops-editor">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No hay paraderos agregados. Agregue paraderos usando el campo superior.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-pen"></i> Trazar ruta sobre el mapa (Arequipa)</label>
+                        <p style="color:#7f8c8d; margin-top:4px;">Dibuja la ruta libremente. Al soltar el trazado la ajustaremos a las calles reales y guardaremos los puntos en coordenadas.</p>
+                        <div id="routeDrawMap" style="height:350px; border-radius:10px; overflow:hidden; margin-top:8px; border:1px solid #e0e0e0;"></div>
+                    </div>
+                    
+                    <input type="hidden" id="modalRouteId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelRouteBtn">Cancelar</button>
+                <button class="btn-primary" id="saveRouteBtn">
+                    <i class="fas fa-save"></i>
+                    <span id="saveRouteText">Guardar Ruta</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar paradero -->
+    <div class="modal" id="stopModal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marker-alt"></i> <span id="stopModalTitle">Nuevo Paradero</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="stopForm">
+                    <div class="form-group">
+                        <label for="stopModalNombre"><i class="fas fa-signature"></i> Nombre del Paradero *</label>
+                        <input type="text" id="stopModalNombre" required placeholder="Ej: Estación Central">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stopModalDireccion"><i class="fas fa-map-pin"></i> Dirección</label>
+                            <input type="text" id="stopModalDireccion" placeholder="Dirección exacta">
+                        </div>
+                        <div class="form-group">
+                            <label for="stopModalTiempo"><i class="fas fa-clock"></i> Tiempo de Espera (min)</label>
+                            <input type="number" id="stopModalTiempo" min="0" max="30" value="2">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stopModalLat"><i class="fas fa-globe-americas"></i> Latitud</label>
+                            <input type="number" id="stopModalLat" step="0.000001" placeholder="Ej: -12.046374">
+                        </div>
+                        <div class="form-group">
+                            <label for="stopModalLng"><i class="fas fa-globe-americas"></i> Longitud</label>
+                            <input type="number" id="stopModalLng" step="0.000001" placeholder="Ej: -77.042793">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stopModalObservaciones"><i class="fas fa-sticky-note"></i> Observaciones</label>
+                        <textarea id="stopModalObservaciones" rows="2" placeholder="Observaciones sobre el paradero..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="stopModalId">
+                    <input type="hidden" id="stopModalRouteId">
+                    <input type="hidden" id="stopModalIndex">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelStopBtn">Cancelar</button>
+                <button class="btn-primary" id="saveStopBtn">
+                    <i class="fas fa-save"></i>
+                    <span id="saveStopText">Guardar Paradero</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de detalles de ruta -->
+    <div class="modal" id="routeDetailsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Detalles de la Ruta</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="route-details" id="routeDetailsContent">
+                    <!-- Los detalles se cargarán por JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="closeDetailsBtn">Cerrar</button>
+                <button class="btn-primary" id="editRouteDetailsBtn">
+                    <i class="fas fa-edit"></i> Editar Ruta
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/rutas.js"></script>
+</body>
+</html>

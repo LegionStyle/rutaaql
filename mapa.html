@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa en Tiempo Real - Sistema GPS Transporte</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Mantén todos los estilos CSS que ya tenías aquí */
+        #map {
+            height: calc(100vh - 160px);
+            width: 100%;
+            border-radius: 12px;
+            z-index: 1;
+            background: #f0f0f0; /* Color temporal para ver si el div se carga */
+        }
+        
+        .map-container {
+            position: relative;
+            height: 100%;
+        }
+        
+        /* Añade esto temporalmente para debug */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">Cargando...</div>
+    
+    <!-- Barra lateral reducida -->
+    <div class="sidebar sidebar-mini">
+        <div class="sidebar-header">
+            <div class="company-logo">
+                <i class="fas fa-bus-alt"></i>
+                <div class="company-info">
+                    <h3 id="companyName">Transporte Rápido S.A.</h3>
+                    <span class="company-status"><i class="fas fa-circle online"></i> En línea</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <ul>
+                <li>
+                    <a href="dashboard.html" title="Dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="vehiculos.html" title="Vehículos">
+                        <i class="fas fa-bus"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="rutas.html" title="Rutas">
+                        <i class="fas fa-route"></i>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="mapa.html" title="Mapa en Tiempo Real">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span class="live-indicator"></span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="btn-logout" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenido principal - Solo mapa -->
+    <div class="main-content full-map">
+        <!-- Header minimalista -->
+        <header class="map-header">
+            <div class="header-left">
+                <h1><i class="fas fa-map-marked-alt"></i> Mapa en Tiempo Real</h1>
+                <div class="header-stats">
+                    <span class="stat-item">
+                        <i class="fas fa-bus"></i>
+                        <span id="totalVehicles">0</span> vehículos
+                    </span>
+                    <span class="stat-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span id="movingVehicles">0</span> en movimiento
+                    </span>
+                    <span class="stat-item">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiza cada <span id="updateInterval">3</span>s
+                    </span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="map-controls-top">
+                    <div class="route-filter">
+                        <label for="routeFilterSelect" style="font-size:12px; color:#7f8c8d; margin-right:6px;">Ruta:</label>
+                        <select id="routeFilterSelect" style="padding:6px 8px; border:1px solid #ccc; border-radius:6px; font-size:13px;">
+                            <option value="all">Todas</option>
+                        </select>
+                    </div>
+                    <button class="btn-map-control" id="centerMapBtn" title="Centrar mapa">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button class="btn-map-control" id="toggleTrafficBtn" title="Mostrar/ocultar tráfico">
+                        <i class="fas fa-traffic-light"></i>
+                    </button>
+                    <button class="btn-map-control" id="toggleSatelliteBtn" title="Vista satélite">
+                        <i class="fas fa-satellite"></i>
+                    </button>
+                    <button class="btn-map-control" id="fullscreenBtn" title="Pantalla completa">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="btn-primary" id="refreshMapBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Contenedor del mapa -->
+        <div class="map-container">
+            <div id="map">Cargando mapa de Google...</div>
+        </div>
+        
+        <!-- Footer del mapa -->
+        <footer class="map-footer">
+            <div class="footer-left">
+                <span class="connection-status">
+                    <i class="fas fa-circle online"></i>
+                    <span id="connectionStatus">Conectando...</span>
+                </span>
+                <span class="update-timer">
+                    <i class="fas fa-sync-alt"></i>
+                    Actualizando en <span id="countdown">3</span>s
+                </span>
+            </div>
+            <div class="footer-right">
+                <span class="coordinates">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Lat: <span id="currentLat">0.0000</span>, Lng: <span id="currentLng">0.0000</span>
+                </span>
+                <span class="zoom-level">
+                    <i class="fas fa-search"></i>
+                    Zoom: <span id="zoomLevel">0</span>
+                </span>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Scripts CORREGIDOS -->
+    <script>
+        // Debug info
+        document.getElementById('debugInfo').textContent = 'DOM cargado - Iniciando scripts';
+        
+        // Función para cargar Google Maps
+        function loadGoogleMaps() {
+            console.log('1. Iniciando carga de Google Maps API');
+            document.getElementById('debugInfo').textContent = 'Cargando Google Maps API...';
+            document.getElementById('connectionStatus').textContent = 'Conectando a Google Maps...';
+            
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBCY2Ixmmicz3cQb2MRdvnIKM6kjvZkS7M&libraries=places,visualization&v=weekly';
+            script.async = true;
+            script.defer = true;
+            
+            script.onload = function() {
+                console.log('2. ✅ Google Maps API cargada correctamente');
+                document.getElementById('debugInfo').textContent = 'Google Maps API cargada';
+                document.getElementById('connectionStatus').textContent = 'Conectado a Google Maps';
+                
+                // Verificar que la función exista
+                if (typeof inicializarMapa === 'function') {
+                    console.log('3. ✅ Función inicializarMapa encontrada');
+                    inicializarMapa();
+                } else {
+                    console.error('3. ❌ Error: inicializarMapa NO es una función');
+                    document.getElementById('debugInfo').textContent = 'ERROR: inicializarMapa no es función';
+                    document.getElementById('connectionStatus').textContent = 'Error de inicialización';
+                }
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Error al cargar Google Maps API');
+                document.getElementById('debugInfo').textContent = 'ERROR: No se pudo cargar Google Maps';
+                document.getElementById('connectionStatus').textContent = 'Error de conexión con Google Maps';
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Cargar Google Maps cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('0. DOM completamente cargado');
+            loadGoogleMaps();
+        });
+        
+        // También cargar si el DOM ya está listo
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            console.log('DOM ya está listo, cargando Google Maps');
+            loadGoogleMaps();
+        }
+    </script>
+    
+    <!-- Nuestro script -->
+    <script src="js/mapa-google.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
